@@ -9,6 +9,35 @@ import (
 	"strings"
 )
 
+var reader = bufio.NewReader(os.Stdin)
+
+func main() {
+	value1 := getInputValue("Value 1: ")
+	value2 := getInputValue("Value 2: ")
+
+	operator := getOperator("Select an operation (+ - * /): ")
+
+	calc := Calculator{value1, value2, operator}
+	result := calc.operate()
+
+	fmt.Printf("The result of calculation is %v\n", result)
+}
+
+func getInputValue(prompt string) float64 {
+	input, _ := askInput(prompt)
+	return parseStringToInt(input)
+}
+
+func getOperator(prompt string) string {
+	input, _ := askInput(prompt)
+	return strings.TrimSpace(input)
+}
+
+func askInput(prompt string) (string, error) {
+	fmt.Printf("%v: ", prompt)
+	return reader.ReadString('\n')
+}
+
 func parseStringToInt(x string) float64 {
 	result, err := strconv.ParseFloat(strings.TrimSpace(x), 64)
 	if err != nil {
@@ -17,19 +46,42 @@ func parseStringToInt(x string) float64 {
 	return result
 }
 
-func main() {
-	reader := bufio.NewReader(os.Stdin)
+type Calculator struct {
+	first     float64
+	second    float64
+	operation string
+}
 
-	fmt.Print("Value 1: ")
-	input1, _ := reader.ReadString('\n')
-	float1 := parseStringToInt(input1)
+func (c Calculator) operate() float64 {
+	var result float64
+	switch c.operation {
+	case "+":
+		result = sum(c.first, c.second)
+	case "-":
+		result = substract(c.first, c.second)
+	case "*":
+		result = multiply(c.first, c.second)
+	case "/":
+		result = divide(c.first, c.second)
+	default:
+		panic("Invalid operator syntax.")
+	}
 
-	fmt.Print("Value 2: ")
-	input2, _ := reader.ReadString('\n')
-	float2 := parseStringToInt(input2)
+	return math.Round(result*100) / 100
+}
 
-	sum := float1 + float2
-	sum = math.Round((sum * 100)) / 100
+func sum(x float64, y float64) float64 {
+	return x + y
+}
 
-	fmt.Printf("The sum of %v and %v is %v\n", float1, float2, sum)
+func substract(x float64, y float64) float64 {
+	return x - y
+}
+
+func multiply(x float64, y float64) float64 {
+	return x * y
+}
+
+func divide(x float64, y float64) float64 {
+	return x / y
 }
